@@ -3,7 +3,30 @@ requires = ["setuptools>=68.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "ntt-rag-case"
+name = "ntt-rag"
 version = "0.1.0"
 description = "RAG-based PDF Question Answering System built on FastAPI"
 requires-python = ">=3.11"
+dependencies = [
+    "pymupdf >= 1.26.7",
+    "langchain-community >= 0.4.1",
+    "langchain >= 1.2.0",
+    "openai >= 2.12.0"
+]
+
+
+[project.optional-dependencies]
+dev = ["pytest", "pytest-cov"]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+pythonpath = ["src"]
+
+
