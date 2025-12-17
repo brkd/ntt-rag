@@ -11,12 +11,14 @@ dependencies = [
     "pymupdf >= 1.26.7",
     "langchain-community >= 0.4.1",
     "langchain >= 1.2.0",
+    "langchain-chroma >= 1.1.0",
+    "langchain-huggingface >= 1.2.0",
     "openai >= 2.12.0"
 ]
 
 
 [project.optional-dependencies]
-dev = ["pytest", "pytest-cov"]
+dev = ["pytest", "pytest-cov", "pytest-asyncio"]
 
 [tool.setuptools]
 package-dir = {"" = "src"}
