@@ -9,7 +9,7 @@ class VectorStoreBuilder:
         self.collection_name = collection_name
         self.host = host
         self.port = port
-        self.embedding_model = HuggingFaceEmbeddings(model=embedding_model)
+        self.embedding_model = HuggingFaceEmbeddings(model=embedding_model, model_kwargs={"device": "cpu"},)
         self.vector_store = Chroma(
             collection_name=collection_name,
             embedding_function=self.embedding_model,
@@ -18,7 +18,8 @@ class VectorStoreBuilder:
         )
 
     def add(self, documents: List[Document]):
-        self.vector_store.add_documents(documents=documents)
+        ids = [doc.metadata["chunk_id"] for doc in documents]
+        self.vector_store.add_documents(documents=documents, ids=ids)
 
     async def search(self, query: str, k: int = 3) -> List[Tuple[Document, float]]:
         search_result = await self.vector_store.asimilarity_search_with_score(query, k=k)

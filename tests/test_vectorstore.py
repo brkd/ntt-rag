@@ -35,14 +35,15 @@ def vector_store_builder(mock_embedding_model, mock_chroma):
         collection_name="test_collection",
         host="localhost",
         port=8000,
-        embedding_model="sentence-transformers/all-MiniLM-L6-v2"
+        embedding_model="sentence-transformers/all-MiniLM-L6-v2",
     )
 
 
 def test_initialization(vector_store_builder, mock_embedding_model, mock_chroma):
     """Test that VectorStoreBuilder initializes correctly"""
     mock_embedding_model.assert_called_once_with(
-        model="sentence-transformers/all-MiniLM-L6-v2"
+        model="sentence-transformers/all-MiniLM-L6-v2",
+        model_kwargs={"device": "cpu"}
     )
     
     mock_chroma.assert_called_once()
@@ -55,14 +56,14 @@ def test_initialization(vector_store_builder, mock_embedding_model, mock_chroma)
 def test_add_documents(vector_store_builder):
     """Test adding documents to the vector store"""
     documents = [
-        Document(page_content="Document 1", metadata={"source": "test1"}),
-        Document(page_content="Document 2", metadata={"source": "test2"})
+        Document(page_content="Document 1", metadata={"source": "test1", "chunk_id": 0}),
+        Document(page_content="Document 2", metadata={"source": "test2", "chunk_id": 1})
     ]
     
     vector_store_builder.add(documents)
     
     vector_store_builder.vector_store.add_documents.assert_called_once_with(
-        documents=documents
+        documents=documents, ids=[0, 1]
     )
 
 
