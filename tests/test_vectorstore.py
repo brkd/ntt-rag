@@ -56,14 +56,14 @@ def test_initialization(vector_store_builder, mock_embedding_model, mock_chroma)
 def test_add_documents(vector_store_builder):
     """Test adding documents to the vector store"""
     documents = [
-        Document(page_content="Document 1", metadata={"source": "test1"}),
-        Document(page_content="Document 2", metadata={"source": "test2"})
+        Document(page_content="Document 1", metadata={"source": "test1", "chunk_id": 0}),
+        Document(page_content="Document 2", metadata={"source": "test2", "chunk_id": 1})
     ]
     
     vector_store_builder.add(documents)
     
     vector_store_builder.vector_store.add_documents.assert_called_once_with(
-        documents=documents
+        documents=documents, ids=[0, 1]
     )
 
 
