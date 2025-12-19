@@ -1,4 +1,8 @@
+from pathlib import Path
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+BASE_DIR = Path(__file__).resolve().parents[2]
+ENV_PATH = BASE_DIR / ".env"
 
 
 class BaseConfig(BaseSettings):
@@ -13,10 +17,12 @@ class BaseConfig(BaseSettings):
     EMBEDDING_MODEL: str = "Qwen/Qwen3-Embedding-0.6B"
 
     PDF_LOCATION: str
+    CHUNK_SIZE: int = 880
+    CHUNK_OVERLAP: int = 100
 
     model_config = SettingsConfigDict(
         env_prefix="NTT_RAG_",
-        env_file=".env"
+        env_file=ENV_PATH
     )
 
 def get_config() -> BaseConfig:

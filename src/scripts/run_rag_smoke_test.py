@@ -8,38 +8,43 @@ from vectorstore.vectorstore import VectorStoreBuilder
 from rag.llm import LLMInterface
 from rag.pipeline import RAGPipeline
 
-async def main():
+from config.config import BaseConfig
 
-    loader = PDFLoader("/home/brkd/Desktop/repos/ntt-rag/data/raw")
+async def main():
+    base_config = BaseConfig()
+
+    loader = PDFLoader(base_config.PDF_LOCATION)
     documents = loader.load()
-    print(f"Loaded {len(documents)} documents")
 
     if not documents:
         print("No documents loaded")
         return
     
+    print(f"Loaded {len(documents)} documents")
+
     cleaner = Cleaner()
     cleaned_documents = cleaner.clean(documents)
     print(f"Cleaned {len(cleaned_documents)} documents")
 
-    chunker = Chunker(chunk_size=800, chunk_overlap=100)
+    chunker = Chunker(chunk_size=base_config.CHUNK_SIZE, chunk_overlap=base_config.CHUNK_OVERLAP)
     chunks = chunker.chunk(cleaned_documents)
     print(f"Created {len(chunks)} chunks")
 
     vectorstore = VectorStoreBuilder(
-        collection_name="demo_collection",
-        host="localhost",
-        port=8000,
-        embedding_model="Qwen/Qwen3-Embedding-0.6B",
+        collection_name=base_config.CHROMA_COLLECTION,
+        host=base_config.CHROMA_HOST,
+        port=base_config.CHROMA_PORT,
+        embedding_model=base_config.EMBEDDING_MODEL,
     )
 
     vectorstore.add(chunks)
     print("Documents added to vector store")
 
     llm = LLMInterface(
-        model="llama3.2:3b",
-        inference_server_url="http://localhost:11434/v1",
-        temperature=0.0,
+        model=base_config.LLM_MODEL,
+        inference_server_url=base_config.INFERENCE_SERVER_URL,
+        temperature=base_config.LLM_TEMPERATURE,
+        max_tokens=base_config.LLM_MAX_TOKENS
     )
 
     rag = RAGPipeline(vectorstore=vectorstore, llm=llm)
