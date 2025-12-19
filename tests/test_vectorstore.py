@@ -35,14 +35,15 @@ def vector_store_builder(mock_embedding_model, mock_chroma):
         collection_name="test_collection",
         host="localhost",
         port=8000,
-        embedding_model="sentence-transformers/all-MiniLM-L6-v2"
+        embedding_model="sentence-transformers/all-MiniLM-L6-v2",
     )
 
 
 def test_initialization(vector_store_builder, mock_embedding_model, mock_chroma):
     """Test that VectorStoreBuilder initializes correctly"""
     mock_embedding_model.assert_called_once_with(
-        model="sentence-transformers/all-MiniLM-L6-v2"
+        model="sentence-transformers/all-MiniLM-L6-v2",
+        model_kwargs={"device": "cpu"}
     )
     
     mock_chroma.assert_called_once()
