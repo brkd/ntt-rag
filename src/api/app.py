@@ -41,5 +41,11 @@ async def lifespan(app: FastAPI):
     chunks = chunker.chunk(cleaned_documents)
 
     vectorstore.add(chunks)
-    
+
     yield
+
+
+from router import api_router
+
+app = FastAPI()
+app.include_router(api_router)
