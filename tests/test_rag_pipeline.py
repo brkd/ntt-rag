@@ -33,7 +33,7 @@ async def test_rag_pipeline_returns_answers_and_sources():
         (
             Document(
                 page_content="NTT Data promotes sustainability.",
-                metadata={"source": "doc1.pdf"},
+                metadata={"source": "doc1.pdf", "file_name": "doc1.pdf", "page": 0},
             ),
             0.01,
         )
@@ -50,4 +50,4 @@ async def test_rag_pipeline_returns_answers_and_sources():
     result = await pipeline.ask("What does NTT Data promote?")
 
     assert "NTT Data promotes sustainability." in result["answer"]
-    assert result["sources"] == ["doc1.pdf"]
+    assert result["sources"] == [{"source": "doc1.pdf", "file_name": "doc1.pdf", "page": 0}]
