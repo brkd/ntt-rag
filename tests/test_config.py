@@ -5,6 +5,7 @@ from config.config import BaseConfig
 
 def test_settings_requires_inference_url(monkeypatch):
     monkeypatch.delenv("NTT_RAG_INFERENCE_SERVER_URL", raising=False)
+    monkeypatch.setenv("NTT_RAG_PDF_LOCATION", "data/dir")
 
     with pytest.raises(ValidationError):
         BaseConfig()
@@ -12,6 +13,7 @@ def test_settings_requires_inference_url(monkeypatch):
 
 def test_settings_requires_pdf_location(monkeypatch):
     monkeypatch.delenv("NTT_RAG_PDF_LOCATION", raising=False)
+    monkeypatch.setenv("NTT_RAG_INFERENCE_SERVER_URL", "http://localhost:8001")
 
     with pytest.raises(ValidationError):
         BaseConfig()

@@ -1,3 +1,5 @@
+import hashlib
+
 from typing import List
 
 from langchain_core.documents import Document
@@ -14,5 +16,26 @@ class Chunker:
 
 
     def chunk(self, documents: List[Document]) -> List[Document]:
-        
-        return self.chunker.split_documents(documents)
+        chunks = self.chunker.split_documents(documents)
+
+        chunk_counters = {}
+
+        for chunk in chunks:
+            source = chunk.metadata.get("source", "unknown")
+            page = chunk.metadata.get("page", -1)
+
+            key = (source, page)
+            chunk_index = chunk_counters.get(key, 0)
+            chunk_counters[key] = chunk_index + 1
+
+            raw_id = f"{source}::{page}::{chunk_index}"
+            chunk_id = hashlib.sha256(raw_id.encode("utf-8")).hexdigest()
+
+            chunk.metadata.update({
+                "file_name": source.split("/")[-1],
+                "page": page,
+                "chunk_index": chunk_index,
+                "chunk_id": chunk_id
+            })
+            
+        return chunks
