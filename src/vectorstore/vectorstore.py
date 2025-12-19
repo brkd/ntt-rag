@@ -18,7 +18,8 @@ class VectorStoreBuilder:
         )
 
     def add(self, documents: List[Document]):
-        self.vector_store.add_documents(documents=documents)
+        ids = [doc.metadata["chunk_id"] for doc in documents]
+        self.vector_store.add_documents(documents=documents, ids=ids)
 
     async def search(self, query: str, k: int = 3) -> List[Tuple[Document, float]]:
         search_result = await self.vector_store.asimilarity_search_with_score(query, k=k)
