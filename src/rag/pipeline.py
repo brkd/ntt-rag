@@ -36,11 +36,6 @@ class RAGPipeline:
         # Retrieve relevant documents
         results = await self.vectorstore.search(query=question, k=k)
 
-        for result in results:
-            print("----------------------")
-            print(result[0].page_content)
-            print("----------------------")
-
 
         documents = [doc for doc, _ in results]
 
@@ -57,7 +52,10 @@ class RAGPipeline:
 
         # Collect sources
         sources = list(
-            {doc.metadata.get("source", "unknown") for doc in documents}
+            {"source": doc.metadata.get("source", "unknown"),
+             "file_name": doc.metadata.get("file_name", "unknown"),
+             "page": doc.metadata.get("page", "unknown")}
+             for doc in documents
         )
 
         return {
