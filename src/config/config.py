@@ -21,6 +21,9 @@ class BaseConfig(BaseSettings):
     CHUNK_SIZE: int = 880
     CHUNK_OVERLAP: int = 100
 
+    API_HOST: str = "0.0.0.0"
+    API_PORT: int = 9632
+
     model_config = SettingsConfigDict(
         env_prefix="NTT_RAG_",
         env_file=None
