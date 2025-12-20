@@ -28,7 +28,9 @@ class Chunker:
             chunk_index = chunk_counters.get(key, 0)
             chunk_counters[key] = chunk_index + 1
 
-            raw_id = f"{source}::{page}::{chunk_index}"
+            content_fingerprint = chunk.page_content.strip()
+
+            raw_id = f"{source}::{page}::{chunk_index}::{content_fingerprint}"
             chunk_id = hashlib.sha256(raw_id.encode("utf-8")).hexdigest()
 
             chunk.metadata.update({
