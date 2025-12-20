@@ -8,9 +8,28 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
+    env:
+      NTT_RAG_PDF_LOCATION: data/raw
+      NTT_RAG_CHROMA_HOST: chroma.db.address
+      NTT_RAG_CHROMA_PORT: 1234
+      NTT_RAG_CHROMA_COLLECTION: demo_collection
+
+      NTT_RAG_EMBEDDING_MODEL: embedding-model
+
+      NTT_RAG_LLM_MODEL: llm
+      NTT_RAG_INFERENCE_SERVER_URL: http://fake.inference.url:1234
+      NTT_RAG_LLM_TEMPERATURE: 0.0
+
+      NTT_RAG_API_HOST: localhost
+      NTT_RAG_API_PORT: 1234
+
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
+
+      - name: Debug env
+        run: |
+          echo "PDF=$NTT_RAG_PDF_LOCATION"
 
       - name: Set up Python
         uses: actions/setup-python@v5
