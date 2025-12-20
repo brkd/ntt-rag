@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 
 from rag.pipeline import RAGPipeline
 
@@ -14,6 +14,7 @@ def check_health_status() -> HealthCheck:
 
 @api_router.post('/ask', response_model=LLMAnswer)
 async def ask_question(payload: LLMQuestion, rag: RAGPipeline = Depends(get_rag_pipeline)) -> LLMAnswer:
-    result = await rag.ask(question=payload.question)
-
-    return result
+    try:
+        return await rag.ask(payload.question)
+    except Exception as e:
+        raise HTTPException(status_code=500)
