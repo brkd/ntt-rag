@@ -2,8 +2,8 @@ from fastapi import APIRouter, Depends
 
 from rag.pipeline import RAGPipeline
 
-from schemas import HealthCheck
-from app_services import get_rag_pipeline
+from api.schemas import HealthCheck
+from api.app_services import get_rag_pipeline
 
 api_router = APIRouter()
 

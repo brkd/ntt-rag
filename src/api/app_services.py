@@ -1,4 +1,4 @@
-from app import (
+from api.app import (
     vectorstore,
     llm,
 )

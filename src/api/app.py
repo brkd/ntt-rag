@@ -45,7 +45,13 @@ async def lifespan(app: FastAPI):
     yield
 
 
-from router import api_router
+from api.router import api_router
 
 app = FastAPI()
 app.include_router(api_router)
+
+
+if __name__ == '__main__':
+    import uvicorn
+
+    uvicorn.run("app:app", host=app_config.API_HOST, port=app_config.API_PORT, reload=False)
