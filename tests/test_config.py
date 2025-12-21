@@ -35,6 +35,8 @@ def test_settings_defaults(monkeypatch):
     monkeypatch.delenv("NTT_RAG_CHUNK_SIZE", raising=False)
     monkeypatch.delenv("NTT_RAG_CHUNK_OVERLAP", raising=False)
 
+    monkeypatch.delenv("NTT_RAG_DATA_VERSION_FILE", raising=False)
+
 
     monkeypatch.setenv("NTT_RAG_INFERENCE_SERVER_URL", "http://localhost:8001")
     monkeypatch.setenv("NTT_RAG_PDF_LOCATION", "data/dir")
@@ -55,6 +57,8 @@ def test_settings_defaults(monkeypatch):
 
     assert base_config.CHUNK_SIZE == 880
     assert base_config.CHUNK_OVERLAP == 100
+
+    assert base_config.DATA_VERSION_FILE == ".document_versions.json"
 
 
 def test_settings_env_override(monkeypatch):

@@ -3,15 +3,12 @@ version: '3.8'
 services:
   # ChromaDB Service
   chromadb:
-    # build:
-    #   context: .
-    #   dockerfile: Dockerfile.chromadb
     image: chromadb/chroma
     container_name: ntt-rag-chromadb
     ports:
       - "8001:8000"
     volumes:
-      - ./vectordb:/chroma/chroma
+      - ./vectordb_mount:/chroma/chroma
     environment:
       - IS_PERSISTENT=TRUE
       - ANONYMIZED_TELEMETRY=FALSE
@@ -25,9 +22,6 @@ services:
 
   # Ollama Service
   ollama:
-    # build:
-    #   context: .
-    #   dockerfile: Dockerfile.ollama
     image: ollama/ollama
     container_name: ntt-rag-ollama
     ports:
@@ -62,7 +56,9 @@ services:
       - .env
     environment:
       # Override .env values
+      - NTT_RAG_N_SOURCE_RETRIEVAL=10
       - NTT_RAG_PDF_LOCATION=/app/data/raw
+      - NTT_RAG_DATA_VERSION_FILE=/app/data/.document_versions.json
       - NTT_RAG_CHROMA_HOST=chromadb
       - NTT_RAG_CHROMA_PORT=8000
       - NTT_RAG_INFERENCE_SERVER_URL=http://ollama:11434/v1
