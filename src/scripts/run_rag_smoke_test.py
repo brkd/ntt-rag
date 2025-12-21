@@ -57,10 +57,10 @@ async def main():
 
     rag = RAGPipeline(vectorstore=vectorstore, llm=llm)
 
-    question = "What did Berkay Demireller do for the CULTURATI project?"
+    question = "What information is in the documents related to 2014?"
     print(f"\nQuestion: {question}")
 
-    result = await rag.ask(question, k=3)
+    result = await rag.ask(question, k=20)
 
     print("\nAnswer:")
     print(result["answer"])

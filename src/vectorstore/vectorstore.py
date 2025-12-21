@@ -9,7 +9,7 @@ class VectorStoreBuilder:
         self.collection_name = collection_name
         self.host = host
         self.port = port
-        self.embedding_model = HuggingFaceEmbeddings(model=embedding_model, model_kwargs={"device": "cpu"},)
+        self.embedding_model = HuggingFaceEmbeddings(model=embedding_model, model_kwargs={"device": "cpu"}, encode_kwargs={"batch_size": 64})
         self.vector_store = Chroma(
             collection_name=collection_name,
             embedding_function=self.embedding_model,

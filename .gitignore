@@ -209,3 +209,6 @@ __marimo__/
 # Custom
 data/
 vectordb/
+vectordb_mount/
+ollama_mount/
+notebooks/
