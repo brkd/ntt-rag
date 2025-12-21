@@ -2,7 +2,7 @@ import pytest
 from fastapi.testclient import TestClient
 from unittest.mock import AsyncMock
 
-from api.app import app
+from api.app import create_app
 from api.app_services import get_rag_pipeline
 
 @pytest.fixture
@@ -16,6 +16,7 @@ def mock_rag_pipeline(monkeypatch):
 
 @pytest.fixture
 def client(mock_rag_pipeline):
+    app = create_app(enable_ingestion=False)
     app.dependency_overrides[get_rag_pipeline] = lambda: mock_rag_pipeline
 
     with TestClient(app) as client:

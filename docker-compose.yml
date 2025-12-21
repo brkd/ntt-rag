@@ -1,0 +1,86 @@
+version: '3.8'
+
+services:
+  # ChromaDB Service
+  chromadb:
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile.chromadb
+    image: chromadb/chroma
+    container_name: ntt-rag-chromadb
+    ports:
+      - "8001:8000"
+    volumes:
+      - ./vectordb:/chroma/chroma
+    environment:
+      - IS_PERSISTENT=TRUE
+      - ANONYMIZED_TELEMETRY=FALSE
+    networks:
+      - ntt-rag-network
+    healthcheck:
+      test: [ "CMD", "/bin/bash", "-c", "cat < /dev/null > /dev/tcp/localhost/8000" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Ollama Service
+  ollama:
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile.ollama
+    image: ollama/ollama
+    container_name: ntt-rag-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ./ollama_mount:/root/.ollama
+      - ./ollama-entrypoint.sh:/ollama-entrypoint.sh
+    env_file:
+      - .env
+    entrypoint: ["/bin/bash", "/ollama-entrypoint.sh"]
+    networks:
+      - ntt-rag-network
+    healthcheck:
+      test:  [ "CMD-SHELL", "bash", "-c", "{ printf >&3 'GET / HTTP/1.0\\r\\n\\r\\n'; cat <&3; } 3<>/dev/tcp/localhost/11434 | grep 'Ollama is' || exit 1"  ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  # FastAPI Application
+  fastapi:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ntt-rag-fastapi
+    ports:
+      - "9632:9632"
+    volumes:
+      - ./src:/app/src
+      - ./data:/app/data
+    env_file:
+      - .env
+    environment:
+      # Override .env values
+      - NTT_RAG_PDF_LOCATION=/app/data/raw
+      - NTT_RAG_CHROMA_HOST=chromadb
+      - NTT_RAG_CHROMA_PORT=8000
+      - NTT_RAG_INFERENCE_SERVER_URL=http://ollama:11434/v1
+      - OLLAMA_PORT=11434
+      - PYTHONUNBUFFERED=1
+    depends_on:
+      chromadb:
+        condition: service_healthy
+      ollama:
+        condition: service_healthy
+    networks:
+      - ntt-rag-network
+    restart: unless-stopped
+
+networks:
+  ntt-rag-network:
+    driver: bridge
+
+volumes:
+  chromadb_data:
+  ollama_data:
