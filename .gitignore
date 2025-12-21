@@ -212,3 +212,4 @@ vectordb/
 vectordb_mount/
 ollama_mount/
 notebooks/
+*.document_versions.json
