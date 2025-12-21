@@ -3,12 +3,19 @@ import asyncio
 from ingestion.loader import PDFLoader
 from ingestion.cleaner import Cleaner
 from ingestion.chunker import Chunker
+from ingestion.version_manager import VersionManager
 
+from vectorstore.versioned_store import VersionedVectorStore
 from vectorstore.vectorstore import VectorStoreBuilder
+
 from rag.llm import LLMInterface
 from rag.pipeline import RAGPipeline
 
+from pathlib import Path
+
 from config.config import AppConfig
+
+VERSION_FILE = Path(".document_versions.json")
 
 async def main():
     app_config = AppConfig()
@@ -37,12 +44,32 @@ async def main():
         embedding_model=app_config.EMBEDDING_MODEL,
     )
 
+    version_manager = VersionManager(VERSION_FILE)
+    versioned_store = VersionedVectorStore(
+        store=vectorstore,
+        versions=version_manager,
+    )
+
     collection = vectorstore.vector_store._collection
 
     count_before = collection.count()
     print(f"Chunks before ingestion: {count_before}")
 
-    vectorstore.add(chunks)
+    # Group chunks by source document
+    from collections import defaultdict
+    chunks_by_source = defaultdict(list)
+
+    for chunk in chunks:
+        chunks_by_source[chunk.metadata["source"]].append(chunk)
+
+    for source, source_chunks in chunks_by_source.items():
+        result = versioned_store.ingest(
+            source=source,
+            chunks=source_chunks,
+        )
+        print(f"Ingestion result for {source}: {result}")
+
+    # vectorstore.add(chunks)
     print("Documents added to vector store")
 
     count_after = collection.count()

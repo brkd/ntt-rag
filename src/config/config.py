@@ -18,8 +18,10 @@ class BaseConfig(BaseSettings):
     EMBEDDING_MODEL: str = "Qwen/Qwen3-Embedding-0.6B"
 
     PDF_LOCATION: str = Field(..., alias="NTT_RAG_PDF_LOCATION")
+    DATA_VERSION_FILE: str = ".document_versions.json"
     CHUNK_SIZE: int = 880
     CHUNK_OVERLAP: int = 100
+    N_SOURCE_RETRIEVAL: int = 20
 
     API_HOST: str = "0.0.0.0"
     API_PORT: int = 9632

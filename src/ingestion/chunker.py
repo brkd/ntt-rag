@@ -30,7 +30,7 @@ class Chunker:
 
             content_fingerprint = chunk.page_content.strip()
 
-            raw_id = f"{source}::{page}::{chunk_index}::{content_fingerprint}"
+            raw_id = f"{page}::{chunk_index}::{content_fingerprint}"
             chunk_id = hashlib.sha256(raw_id.encode("utf-8")).hexdigest()
 
             chunk.metadata.update({

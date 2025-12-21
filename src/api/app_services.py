@@ -1,14 +1,19 @@
 from ingestion.loader import PDFLoader
 from ingestion.cleaner import Cleaner
 from ingestion.chunker import Chunker
+from ingestion.version_manager import VersionManager
 
 from rag.pipeline import RAGPipeline
+
 from vectorstore.vectorstore import VectorStoreBuilder
+from vectorstore.versioned_store import VersionedVectorStore
+
 from rag.llm import LLMInterface
 
 from config.config import AppConfig
 
 from fastapi import Depends
+from pathlib import Path
 
 def get_config() -> AppConfig:
     return AppConfig()
@@ -21,6 +26,14 @@ def get_vectorstore(config: AppConfig = Depends(get_config)) -> VectorStoreBuild
         port=config.CHROMA_PORT,
         embedding_model=config.EMBEDDING_MODEL,
     )
+
+
+def get_version_manager(config: AppConfig = Depends(get_config)) -> VersionManager:
+    return VersionManager(Path(config.DATA_VERSION_FILE))
+
+
+def get_versioned_store(vectorstore: VectorStoreBuilder = Depends(get_vectorstore), version_manager: VersionManager = Depends(get_version_manager)) -> VersionedVectorStore:
+    return VersionedVectorStore(store=vectorstore, versions=version_manager)
 
 
 def get_llm(config: AppConfig = Depends(get_config)) -> LLMInterface:
