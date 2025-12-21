@@ -43,7 +43,8 @@ def test_initialization(vector_store_builder, mock_embedding_model, mock_chroma)
     """Test that VectorStoreBuilder initializes correctly"""
     mock_embedding_model.assert_called_once_with(
         model="sentence-transformers/all-MiniLM-L6-v2",
-        model_kwargs={"device": "cpu"}
+        model_kwargs={"device": "cpu"},
+        encode_kwargs={'batch_size': 64}
     )
     
     mock_chroma.assert_called_once()
