@@ -2,7 +2,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
-from api.app_services import get_ingestion_components, get_config, get_vectorstore
+from api.app_services import get_ingestion_components, get_config, get_versioned_store, get_vectorstore, get_version_manager
 
 
 # Async context manager for startup operations
@@ -11,13 +11,29 @@ async def lifespan(app: FastAPI):
     config = get_config()
 
     loader, cleaner, chunker = get_ingestion_components(config)
-    vectorstore = get_vectorstore(config)
+
+    vector_store = get_vectorstore(config)
+    version_manager = get_version_manager(config)
+
+    versioned_store= get_versioned_store(vector_store, version_manager)
 
     documents = loader.load()
     cleaned_documents = cleaner.clean(documents)
     chunks = chunker.chunk(cleaned_documents)
 
-    vectorstore.add(chunks)
+    from collections import defaultdict
+    chunks_by_source = defaultdict(list)
+
+    for chunk in chunks:
+        chunks_by_source[chunk.metadata["source"]].append(chunk)
+
+    for source, source_chunks in chunks_by_source.items():
+        result = versioned_store.ingest(
+            source=source,
+            chunks=source_chunks,
+        )
+        print(f"Ingestion result for {source}: {result}")
+
 
     yield
 
