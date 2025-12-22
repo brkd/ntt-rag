@@ -4,6 +4,76 @@ RAG-based PDF Question Answering system built on **FastAPI**, **ChromaDB**, and 
 
 The API ingests PDFs on startup, stores embeddings in Chroma, and answers questions via retrieval + LLM generation.
 
+## Architectural Diagram
+
+```bash
+┌────────────────────────────────────────────────────────────┐
+│                        Data Layer                          │
+│                                                            │
+│   ┌──────────────┐        ┌──────────────────────────┐     │
+│   │   Raw PDFs   │ ─────▶ │  Extracted Text Documents│     │
+│   └──────────────┘        └──────────────────────────┘     │
+└────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌────────────────────────────────────────────────────────────┐
+│                   Ingestion & Processing Layer             │
+│                                                            │
+│   ┌──────────────┐  ┌──────────────┐  ┌────────────────┐   │
+│   │  Loader      │▶ │  Cleaner     │▶ │  Chunker       │   │
+│   │  (PDF I/O)   │  │  (Normalize) │  │  (Recursive)   │   │
+│   └──────────────┘  └──────────────┘  └────────────────┘   │
+│                              │                             │
+│                              ▼                             │
+│                   ┌──────────────────────────────┐         │
+│                   │ Versioning & Change Detection│         │
+│                   │ • content hashes             │         │
+│                   │ • diff-based updates         │         │
+│                   └──────────────────────────────┘         │
+└────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌────────────────────────────────────────────────────────────┐
+│                     Storage & Index Layer                  │
+│                                                            │
+│   ┌──────────────────────────────┐                         │
+│   │        Vector Store          │                         │
+│   │  • embeddings                │                         │
+│   │  • metadata                  │                         │
+│   │  • chunk versions            │                         │
+│   └──────────────────────────────┘                         │
+└────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌────────────────────────────────────────────────────────────┐
+│                     Retrieval & Reasoning Layer            │
+│                                                            │
+│   ┌──────────────────────────────┐                         │
+│   │    Retrieval Engine          │                         │
+│   │  • similarity search         │                         │
+│   │  • top-k context selection   │                         │
+│   └──────────────────────────────┘                         │
+│                              │                             │
+│                              ▼                             │
+│   ┌──────────────────────────────┐                         │
+│   │        LLM Interface         │                         │
+│   │  • prompt construction       │                         │
+│   │  • grounded generation       │                         │
+│   └──────────────────────────────┘                         │
+└────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌────────────────────────────────────────────────────────────┐
+│                         API / Client                       │
+│                                                            │
+│   ┌──────────────────────────────┐                         │
+│   │     User / Application       │                         │
+│   │  • questions                 │                         │
+│   │  • answers + sources         │                         │
+│   └──────────────────────────────┘                         │
+└────────────────────────────────────────────────────────────┘
+```
+
 ## What’s included
 
 - **PDF ingestion**: load PDFs from a directory, clean text, chunk it, embed it, and store in Chroma
