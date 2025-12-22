@@ -17,6 +17,7 @@ class RAGPipeline:
         system_message = SystemMessage(content="""You are an assistant answering questions using ONLY the provided context.
                                        
         Instructions:
+        - Answer in the SAME LANGUAGE as the user's question.
         - Base your answer strictly on the context above
         - If the answer is not present, say "I don't know based on the provided documents."
         - Be concise and factual""")
