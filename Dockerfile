@@ -10,14 +10,22 @@ RUN apt-get update && apt-get install -y \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy dependency files AND source code (needed for editable install)
+# Install uv
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh 
+
+# Copy only dependency files first (best for caching)
+COPY requirements.txt ./
+
+
+# Install dependencies (cached unless requirements.txt changes)
+RUN /root/.local/bin/uv pip install --system -r requirements.txt
+
+# This changes often, so copy last
 COPY pyproject.toml ./
 COPY src/ ./src/
 
-# Install uv and dependencies in one go, then clean up
-RUN curl -LsSf https://astral.sh/uv/install.sh | sh && \
-    /root/.local/bin/uv pip install --system -e . && \
-    rm -rf /root/.cargo
+# Install your package without reinstalling deps
+RUN /root/.local/bin/uv pip install --system . --no-deps
 
 # Expose FastAPI port
 EXPOSE 9632
