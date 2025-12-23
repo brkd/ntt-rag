@@ -2,7 +2,7 @@ import json
 import hashlib
 from pathlib import Path
 from datetime import datetime
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from langchain_core.documents import Document
 
@@ -42,12 +42,6 @@ class VersionManager:
     def __init__(self, version_file: Path):
         self.version_file = version_file
         self.state = self._load()
-        self.source_to_doc = {
-            src: doc_hash
-            for doc_hash, data in self.state.items()
-            for src in data.get("sources", [])
-        }
-
 
     def _load(self) -> Dict:
         if self.version_file.exists():
@@ -59,8 +53,21 @@ class VersionManager:
             json.dumps(self.state, indent=2, sort_keys=True)
         )
 
+
+    def get_document(self, document_id: str) -> Optional[Dict]:
+        return self.state.get(document_id)
+
+
+    def get_version(self, document_id: str, document_hash: str) -> Optional[Dict]:
+        doc = self.get_document(document_id)
+        if not doc:
+            return None
+        return doc["versions"].get(document_hash)
+
+
     def get_by_hash(self, document_hash: str):
         return self.state.get(document_hash)
+
 
     def get_by_source(self, source: str):
         doc_hash = self.source_to_doc.get(source)
@@ -69,22 +76,36 @@ class VersionManager:
         return self.state.get(doc_hash)
 
 
-    def register(
+    def register_version(
         self,
+        document_id: str,
         document_hash: str,
         source: str,
         chunk_hashes: Dict[str, str],
     ):
-        self.state[document_hash] = {
+        now = datetime.now().isoformat()
+
+        if document_id not in self.state:
+            self.state[document_id] = {
+                "current_hash": document_hash,
+                "versions": {},
+            }
+
+        self.state[document_id]["versions"][document_hash] = {
             "chunk_hashes": chunk_hashes,
             "chunk_count": len(chunk_hashes),
             "sources": [source],
-            "last_indexed": datetime.now().isoformat(),
+            "last_indexed": now,
         }
-        self.source_to_doc[source] = document_hash
 
-    def add_source(self, document_hash: str, source: str):
-        entry = self.state[document_hash]
-        if source not in entry["sources"]:
-            entry["sources"].append(source)
-        self.source_to_doc[source] = document_hash
+        self.state[document_id]["current_hash"] = document_hash
+
+    def add_source(
+        self,
+        document_id: str,
+        document_hash: str,
+        source: str,
+    ):
+        version = self.get_version(document_id, document_hash)
+        if source not in version["sources"]:
+            version["sources"].append(source)

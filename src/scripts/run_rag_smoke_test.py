@@ -11,6 +11,8 @@ from vectorstore.vectorstore import VectorStoreBuilder
 from rag.llm import LLMInterface
 from rag.pipeline import RAGPipeline
 
+from api.app import derive_document_id
+
 from pathlib import Path
 
 from config.config import AppConfig
@@ -63,7 +65,9 @@ async def main():
         chunks_by_source[chunk.metadata["source"]].append(chunk)
 
     for source, source_chunks in chunks_by_source.items():
+        document_id = derive_document_id(source)
         result = versioned_store.ingest(
+            document_id=document_id,
             source=source,
             chunks=source_chunks,
         )
