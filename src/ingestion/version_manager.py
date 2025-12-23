@@ -74,6 +74,10 @@ class VersionManager:
         if not doc_hash:
             return None
         return self.state.get(doc_hash)
+    
+
+    def get_by_document_id(self, document_id: str):
+        return self.state.get(document_id)
 
 
     def register_version(

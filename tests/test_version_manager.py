@@ -40,25 +40,43 @@ def test_diff_chunks_detects_changes():
 def test_register_and_lookup(tmp_path: Path):
     vm = VersionManager(tmp_path / "versions.json")
 
-    doc_hash = "abc123"
+    document_id = "sr_2015"
+    document_hash = "abc123"
+    source = "sr_2015_20150301_v01.pdf"
     chunks = {"c1": "h1", "c2": "h2"}
 
-    vm.register(doc_hash, "file1.pdf", chunks)
+    vm.register_version(document_id, document_hash, source, chunks)
     vm.save()
 
     loaded = VersionManager(tmp_path / "versions.json")
 
-    assert loaded.get_by_hash(doc_hash)["chunk_count"] == 2
-    assert loaded.get_by_source("file1.pdf")["chunk_count"] == 2
+    version = loaded.get_version(document_id, document_hash)
+
+    assert version is not None
+    assert version["sources"] == [source]
 
 
 def test_add_source_same_content(tmp_path: Path):
     vm = VersionManager(tmp_path / "versions.json")
 
-    vm.register("hash1", "a.pdf", {"c1": "h1"})
-    vm.add_source("hash1", "b.pdf")
+    document_id = "sr_2015"
+    document_hash = "hash1"
 
-    assert vm.get_by_source("a.pdf")
-    assert vm.get_by_source("b.pdf")
+    vm.register_version(
+        document_id=document_id,
+        document_hash=document_hash,
+        source="a.pdf",
+        chunk_hashes={"c1": "h1"},
+    )
 
-    assert len(vm.get_by_hash("hash1")["sources"]) == 2
+    vm.add_source(
+        document_id=document_id,
+        document_hash=document_hash,
+        source="b.pdf",
+    )
+
+    version = vm.get_version(document_id, document_hash)
+
+    assert version is not None
+    assert set(version["sources"]) == {"a.pdf", "b.pdf"}
+    assert len(version["sources"]) == 2
